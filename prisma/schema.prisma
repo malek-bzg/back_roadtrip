@@ -1,0 +1,66 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id           String    @id @default(cuid())
+  Fname        String
+  Lname        String
+  phone_number String
+  email        String    @unique
+  password     String
+  created_at   DateTime  @default(now())
+  deleted_at   DateTime?
+  role         Role      // Ajout du champ role de type Role
+  profilePicture  String? 
+  car                Car?
+  isVerified    Boolean   @default(false) // Ajouter la propriété isVerified
+  updatedAt DateTime @updatedAt
+}
+
+enum Role {
+  Admin
+  User
+  Organisateur
+}
+
+model Event {
+  id String @id @default(cuid())
+  nameDestination String
+  Dateofdeparture DateTime
+  prix String
+  description String
+  maximumNumberOfplaces String
+  eventPicture     String?
+  created_at   DateTime  @default(now())
+  deleted_at   DateTime?
+  updatedAt DateTime @updatedAt
+}
+
+model Car {
+  id          String    @id @default(cuid())
+  name        String
+  color       String
+  userId      String    @unique
+  user        User      @relation(fields: [userId], references: [id])
+  carPicture  String?   // Ajout du champ 'carPicture'
+  created_at   DateTime  @default(now())
+  deleted_at   DateTime? 
+  updatedAt DateTime @updatedAt
+}
+
+model Location {
+  id        String   @id @default(cuid())
+  longitude Float
+  latitude  Float
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}

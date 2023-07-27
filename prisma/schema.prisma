@@ -20,6 +20,7 @@ model User {
   created_at   DateTime  @default(now())
   deleted_at   DateTime?
   role         Role      // Ajout du champ role de type Role
+  status         Int       @default(0)
   profilePicture  String? 
   car                Car?
   isVerified    Boolean   @default(false) // Ajouter la propriété isVerified
@@ -63,4 +64,17 @@ model Location {
   latitude  Float
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+  itineraireId String? // Foreign key to Itineraire model
+
+  // Add the opposite relation field to Itineraire model
+  itineraire   Itineraire? @relation(fields: [itineraireId], references: [id])
+}
+model Itineraire {
+  id            String       @id @default(cuid())
+  name          String
+  description   String
+  locations     Location[]   // Champ 'locations' de type 'Location[]' pour la liste des emplacements
+  created_at    DateTime     @default(now())
+  deleted_at    DateTime?
+  updatedAt     DateTime     @updatedAt
 }

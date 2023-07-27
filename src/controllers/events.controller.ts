@@ -1,5 +1,4 @@
 import { Request, Response } from "express";
-
 import { PrismaClient } from '@prisma/client';
 import multer from "multer";
 import { tokenSecret } from "../../config";
@@ -9,7 +8,7 @@ import { NextFunction } from 'express';
 const prisma = new PrismaClient();
 const storage = multer.diskStorage({
   destination: (req, file, cb) => {
-    cb(null, 'uploads/images/');
+    cb(null, 'public/uploads/images/');
   },
   filename: (req, file, cb) => {
     const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
@@ -28,7 +27,7 @@ export const eventController = {
         }
 
         const { nameDestination, Dateofdeparture, prix, description, maximumNumberOfplaces } = req.body;
-        const eventPicturePath = req.file ? req.file.path : null;
+        const eventPicturePath = req.file ? `/uploads/images/${req.file.filename}` : null;
 
 
         const dateDeparture = new Date(Dateofdeparture);
@@ -54,24 +53,39 @@ export const eventController = {
     },
 
     async showCreateEventPage  (req: Request, res: Response)  {
-      res.render('events/createEvent');
+      res.render('events/create');
     },  
     async showUpdateEventPage  (req: Request, res: Response)  {
-      res.render('events/updateEvent');
-    },
-  async index(req: Request, res: Response) {
-    console.log(req.baseUrl);
-    try {
-    const events = await prisma.event.findMany();
-    if(!req.baseUrl.includes( "api")){
-      return res.render('events/event', {events});
+      try {
+        const eventId = req.params.id;
+
+        // Récupérer l'événement à partir de la base de données en utilisant l'ID
+        const event = await prisma.event.findUnique({
+            where: { id: eventId },
+        });
+
+        if (!event) {
+            return res.status(404).send({ message: 'Event not found' });
+        }
+
+        // Afficher la page update.ejs avec les détails de l'événement
+        return res.render('events/update', { event });
+    } catch (error) {
+        console.log(error);
+        return res.status(500).send({ message: 'An error occurred while retrieving the event' });
     }
-    return res.json(events);
-  } catch (error) {
-    console.log(error);
-    return res.status(500).send({ message: "An error occurred while retrieving users" });
-  }
-    
+},
+    async index(req: Request, res: Response) {
+      try {
+          const events = await prisma.event.findMany();
+          if (!req.baseUrl.includes("api")) {
+              return res.render('events/index', { events: events }); // Assurez-vous que la variable events est correctement définie
+          }
+          return res.json(events);
+      } catch (error) {
+          console.log(error);
+          return res.status(500).send({ message: "An error occurred while retrieving events" });
+      }
   },
 
   async findUniqueEvent(req: Request, res: Response){
@@ -86,28 +100,34 @@ export const eventController = {
     return res.json({uniqueEvent: uniqueEvent})
   },
 
-  async updateEvent(req: Request, res: Response){
-    const paramId= req.params.id;
+  async updateEvent(req: Request, res: Response) {
+    const paramId = req.params.id;
     const nameDestination = req.body.nameDestination;
     const Dateofdeparture = req.body.Dateofdeparture;
     const prix = req.body.prix;
     const description = req.body.description;
     const maximumNumberOfplaces = req.body.maximumNumberOfplaces;
-    
-    const updateEvent = await prisma.event.update({
-        data: {
-            nameDestination: nameDestination,
-            Dateofdeparture: Dateofdeparture,
-            prix: prix,
-            description: description,
-            maximumNumberOfplaces:maximumNumberOfplaces,        
-        },
-        where:{
-            id: paramId,
-        },
-    });
-    return res.json({updateEvent: updateEvent});
-  },
+
+    try {
+        const updateEvent = await prisma.event.update({
+            where: {
+                id: paramId,
+            },
+            data: {
+                nameDestination,
+                Dateofdeparture: new Date(Dateofdeparture),
+                prix,
+                description,
+                maximumNumberOfplaces,
+            },
+        });
+
+        return res.json({ updateEvent });
+    } catch (error) {
+        console.log(error);
+        return res.status(500).send({ message: "An error occurred while updating the event" });
+    }
+},
 
   async editEventPicture (req: Request, res: Response, next: NextFunction){
     try {

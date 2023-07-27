@@ -1,6 +1,7 @@
 import express from 'express';
 import { userController } from '../controllers/user.controller';
 import { upload } from '../middlewares/storage';
+import bodyParser from 'body-parser';
 
 const router = express.Router();
 
@@ -15,7 +16,7 @@ router.post("/forgot-password", userController.forgotPassword);
 router.post("/confirmation", userController.confirmation);
 router.delete("/:id", userController.deletUser);
 router.post("/login", userController.login);
-router.put("/:id", userController.updateUser);
+router.put("/:id", bodyParser.json(), userController.updateUser);
 router.put("/edit-profile-picture/:userId", upload.single('profilePicture'), userController.editProfilePicture);
 router.delete("/all", userController.deleteAll);
 

@@ -6,7 +6,7 @@ import multer from "multer";
 const prisma = new PrismaClient();
 const storage = multer.diskStorage({
   destination: (req, file, cb) => {
-    cb(null, 'uploads/images/');
+    cb(null, 'public/uploads/images');
   },
   filename: (req, file, cb) => {
     const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
@@ -16,32 +16,41 @@ const storage = multer.diskStorage({
 
 const upload = multer({ storage }).single('carPicture');
 export const carController = {
-    async createCar(req: Request, res: Response){
-        try {
-            upload(req, res, async (err) => {
-              if (err) {
-                return res.status(400).send({ message: "Error uploading file" });
-              }
-      
-              const { name, color, userId } = req.body;
-              const carPicturePath = req.file ? req.file.path : null;
-      
-              const car = await prisma.car.create({
-                data: {
-                  name,
-                  color,
-                  userId,
-                  carPicture: carPicturePath,
-                },
-              });
-
-              return res.json({ car });      
-            });
-          } catch (error) {
-            console.log(error);
-            return res.status(500).send({ message: "An error occurred while creating the car" });
-          }
-        },
+  async createCar(req: Request, res: Response) {
+    try {
+      upload(req, res, async (err) => {
+        if (err) {
+          return res.status(400).send({ message: err });
+        }
+  
+        const { name, color, userId } = req.body;
+  
+        // Vérifier si l'utilisateur existe dans la base de données avant de créer la voiture
+        const user = await prisma.user.findUnique({ where: { id: userId } });
+        if (!user) {
+          return res.status(400).send({ message: "User not found" });
+        }
+  
+        const carPicturePath = req.file ? `/uploads/images/${req.file.filename}` : null;
+        console.log(req.file)
+  
+        const car = await prisma.car.create({
+          data: {
+            name,
+            color,
+            userId,
+            carPicture: carPicturePath,
+          },
+        });
+  
+        return res.json({ car });
+      });
+    } catch (error) {
+      console.log(error);
+      return res.status(500).send({ message: "An error occurred while creating the car" });
+    }
+  },
+  
 
     async index(req:Request, res:Response){
       console.log(req.baseUrl);

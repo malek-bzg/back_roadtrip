@@ -1,0 +1,123 @@
+<!-- index.ejs -->
+
+<div class="container-fluid py-4">
+    <h1>USERS</h1>
+    <div class="row">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header pb-0 d-flex align-items-center justify-content-between">
+                    <h6>Users list</h6>
+                    <a class="btn btn-primary btn-sm mb-0" href="/users/create" type="button">Add new</a>
+                </div>
+                <div class="card-body px-0 pt-0 pb-2">
+                    <div class="table-responsive p-0">
+                        <table class="table align-items-center mb-0">
+                            <thead>
+                                <tr>
+                                    <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">FName</th>
+                                    <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7 ps-2">LNAME</th>
+                                    <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">EMAIL</th>
+                                    <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">PHONE_NUMBER</th>
+                                    <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">ROLE</th>
+                                    <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Status</th>
+                                    <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Action</th>
+                                    <th class="text-secondary opacity-7"></th>
+                                </tr>
+                            </thead>
+                            <tbody id="user-table-body">
+                                <!-- Les données des utilisateurs seront insérées ici -->
+                                <% users.forEach(user => { %>
+                                    <tr>
+                                        <td>
+                                            <!-- Insérer le code HTML pour afficher les détails de l'utilisateur -->
+                                            <div class="d-flex px-2 py-1">
+                                                <div>
+                                                    <img src="/assets/img/team-2.jpg" class="avatar avatar-sm me-3" alt="user">
+                                                </div>
+                                                <div class="d-flex flex-column justify-content-center">
+                                                    <p class="text-xs text-secondary mb-0"><%= user.Fname %></p>
+                                                </div>
+                                            </div>
+                                        </td>
+                                        <td>
+                                            <!-- Insérer le code HTML pour afficher les détails de l'utilisateur -->
+                                            <p class="text-xs font-weight-bold mb-0"><%= user.Lname %></p>
+                                        </td>
+                                        <td>
+                                            <!-- Insérer le code HTML pour afficher les détails de l'utilisateur -->
+                                            <p class="text-xs font-weight-bold mb-0"><%= user.email %></p>
+                                        </td>
+                                        <td class="align-middle text-center">
+                                            <!-- Insérer le code HTML pour afficher les détails de l'utilisateur -->
+                                            <span class="text-secondary text-xs font-weight-bold"><%= user.phone_number %></span>
+                                        </td>
+                                        <td class="align-middle">
+                                            <!-- Insérer le code HTML pour afficher les détails de l'utilisateur -->
+                                            <p class="text-xs font-weight-bold mb-0"><%= user.role %></p>
+                                        </td>
+                                        <td class="align-middle">
+                                            <!-- Afficher le statut de l'utilisateur en tant que texte -->
+                                            <% if (user.status === 0) { %>
+                                                <p class="text-xs font-weight-bold mb-0">Active</p>
+                                            <% } else if (user.status === 1) { %>
+                                                <p class="text-xs font-weight-bold mb-0">Banned</p>
+                                            <% } %>
+                                        </td>
+                                        <td class="align-middle">
+                                            <!-- Insérer le code HTML pour les actions d'édition et de suppression de l'utilisateur -->
+                                            <button id="editUserButton" class="btn btn-link btn-sm" onclick="editUser('<%= user.id %>')">Modifier</button>
+                                            <button class="btn btn-link btn-sm" onclick="deleteUser('<%= user.id %>')">Supprimer</button>
+                                        </td>
+                                    </tr>
+                                <% }); %>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@10.15.7/dist/sweetalert2.min.js"></script>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@10.15.7/dist/sweetalert2.min.css">
+
+<!-- Ajouter un script pour les actions d'édition et de suppression (vous pouvez les laisser telles quelles car elles utilisent Fetch) -->
+<script>
+    // Fonctions pour les actions d'édition et de suppression (vous pouvez les laisser telles quelles car elles utilisent Fetch)
+    function editUser(userId) {
+        // Code pour gérer l'action de modification de l'utilisateur
+        // Rediriger vers la page de modification de l'utilisateur avec l'ID du utilisateur
+        window.location.href = `/users/update/${userId}`;
+    }
+
+    function deleteUser(userId) {
+   Swal.fire({
+            title: 'Confirmation',
+            text: "Voulez-vous vraiment supprimer cet utilisateur ?",
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#3085d6',
+            cancelButtonColor: '#d33',
+            confirmButtonText: 'Oui, supprimer',
+            cancelButtonText: 'Annuler'
+        }).then((result) => {
+            if (result.isConfirmed) {
+                // Si l'utilisateur clique sur "Oui", supprimer l'utilisateur
+                fetch(`http://127.0.0.1:3000/api/users/${userId}`, {
+                    method: 'DELETE'
+                })
+                .then(response => response.json())
+                .then(data => {
+                    console.log('User deleted:', data.deletedUser);
+                    // Afficher une alerte de succès après la suppression
+                    Swal.fire('Supprimé !', 'L\'utilisateur a été supprimé avec succès.', 'success');
+                    // Recharger la page pour actualiser le tableau
+                    location.reload();
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                });
+            }
+        });
+    }
+</script>

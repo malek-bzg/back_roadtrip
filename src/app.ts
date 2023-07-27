@@ -3,8 +3,10 @@ import bodyParser from "body-parser";
 import userRoutes from "./routes/user.routes";
 import eventRoutes from "./routes/events.routes";
 import carRoutes from "./routes/car.routes";
-import LocationRoutes from "./routes/location.routes"
-import userViewRoutes from "./routes/user.views.routes"
+import LocationRoutes from "./routes/location.routes";
+import userViewRoutes from "./routes/user.views.routes"; 
+import eventsViewRoutes from "./routes/events.views.routes";
+
 //import { carRoutes, userRoutes, OrganisateurRoutes, eventRoutes , userViewRoutes  } from "./routes";
 
 const path = require("path");
@@ -16,8 +18,9 @@ class App {
     this.server = express();
     this.middlewares();
     this.server.set('views', path.join(__dirname, 'views')); 
+   // this.server.use(express.static(path.join(__dirname, 'public')));
+    this.server.use(express.static(path.join(__dirname, 'public', 'assets')));
     this.server.use(express.static(path.join(__dirname, 'public')));
-
     this.server.set('view engine' , 'ejs');
    this.routes();
   }
@@ -35,11 +38,11 @@ class App {
     //this.server.use("/dashboard", dashboardViewsRoutes);
    // this.server.use("/api/login", userRoutes);
     this.server.use("/api/cars", carRoutes);
-   // this.server.use("/cars", carsViewRoutes);
+    //this.server.use("/cars", carsViewRoutes);
     this.server.use("/api/location", LocationRoutes);
    /// this.server.use("/organisateurs", organisateurViewRoutes );
     this.server.use("/api/events", eventRoutes);
-    //this.server.use("/events" , eventsViewRoutes)
+    this.server.use("/events" , eventsViewRoutes);
     
 
   }

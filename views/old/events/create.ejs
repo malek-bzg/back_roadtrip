@@ -1,0 +1,78 @@
+<div class="container-fluid py-4">
+    <h1>CREATE</h1>
+    <div class="row">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-body">
+                    <form id="create-event-form">
+                        <div class="mb-3">
+                            <label for="nameDestination" class="form-label">Name Destination</label>
+                            <input type="text" class="form-control" id="nameDestination" name="nameDestination" placeholder="Enter destination name">
+                        </div>
+                        <div class="mb-3">
+                            <label for="dateOfDeparture" class="form-label">Date of Departure</label>
+                            <input type="datetime-local" class="form-control" id="dateOfDeparture" name="dateOfDeparture">
+                        </div>
+                        <div class="mb-3">
+                            <label for="prix" class="form-label">Price</label>
+                            <input type="text" class="form-control" id="prix" name="prix" placeholder="Enter price">
+                        </div>
+                        <div class="mb-3">
+                            <label for="description" class="form-label">Description</label>
+                            <textarea class="form-control" id="description" name="description" placeholder="Enter description"></textarea>
+                        </div>
+                        <div class="mb-3">
+                            <label for="maximumNumberOfPlaces" class="form-label">Maximum Number of Places</label>
+                            <input type="text" class="form-control" id="maximumNumberOfPlaces" name="maximumNumberOfPlaces" placeholder="Enter maximum number of places">
+                        </div>
+                        <div class="mb-3">
+                            <label for="eventPicture" class="form-label">Event Picture</label>
+                            <input type="file" class="form-control" id="eventPicture" name="eventPicture">
+                        </div>
+                        <button type="submit" class="btn btn-primary">Create Event</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@10.15.7/dist/sweetalert2.min.js"></script>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@10.15.7/dist/sweetalert2.min.css">
+
+<script>
+    document.getElementById('create-event-form').addEventListener('submit', function(event) {
+        event.preventDefault();
+
+        const form = event.target;
+        const formData = new FormData(form);
+
+        fetch('http://127.0.0.1:3000/api/events/create', {
+            method: 'POST',
+            body: formData
+        })
+        .then(response => {
+            if (!response.ok) {
+                throw new Error('Error: ' + response.status);
+            }
+            return response.json();
+        })
+        .then(data => {
+            console.log(data);
+            // Gérer la réponse de la création d'événement ici
+            Swal.fire({
+                title: 'Succès',
+                text: 'L\'utilisateur a été créé avec succès !',
+                icon: 'success',
+                confirmButtonText: 'Fermer',
+                allowOutsideClick: false,
+                allowEscapeKey: false
+            }).then(() => {
+                // Rediriger vers la page index.ejs après la création réussie
+                window.location.href = '/events';
+            });
+        })
+        .catch(error => {
+            console.error('Error:', error);
+        });
+    });
+</script>

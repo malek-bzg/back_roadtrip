@@ -13,7 +13,7 @@ import sgMail from '@sendgrid/mail';
 const prisma = new PrismaClient();
 const storage = multer.diskStorage({
   destination: (req, file, cb) => {
-    cb(null, 'uploads/images/');
+    cb(null, 'public/uploads/images/');
   },
   filename: (req, file, cb) => {
     const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
@@ -26,57 +26,64 @@ export const userController = {
   
   createUser: async (req: Request, res: Response) => {
     try {
-      upload(req, res, async (err) => {
-        if (err) {
-          return res.status(400).send({ message: "Error uploading file" });
-        }
-        const { Fname, Lname, phone_number, email, password, role } = req.body;
-        if (!Fname || !Lname || !phone_number || !email || !password || !role) {
-          return res.status(400).send({ message: "Please fill in all the fields" });
-        }
-  
-        const hashedPassword = await bcrypt.hash(password, 10);
-        const existingUser = await prisma.user.findUnique({ where: { email } });
-        //const existingPhoneNumber = await prisma.user.findUnique({ where: { phone_number } });
-  
-        if (existingUser) {
-          return res.status(403).send({ message: "User already exists!" });
-        }
-        /*if (existingPhoneNumber) {
-          return res.status(403).send({ message: "Phone number already in use!" });
-        }*/
-  
-        const profilePicturePath = req.file ? req.file.path : null;
-        
-        const user = await prisma.user.create({
-          data: {
-            Fname,
-            Lname,
-            phone_number,
-            email,
-            password: hashedPassword,
-            role,
-            profilePicture: profilePicturePath,
-          },
+        upload(req, res, async (err) => {
+            if (err) {
+                return res.status(400).send({ message: "Error uploading file" });
+            }
+            const { Fname, Lname, phone_number, email, password, role } = req.body;
+            const status = parseInt(req.body.status); // Convertir en nombre entier
+            if (isNaN(status) || (status !== 0 && status !== 1)) {
+              return res.status(400).send({ message: "Invalid status value" });
+            }
+            if (!Fname || !Lname || !phone_number || !email || !password || !role || status === undefined) {
+                return res.status(400).send({ message: "Please fill in all the fields" });
+            }
+
+            const hashedPassword = await bcrypt.hash(password, 10);
+            const existingUser = await prisma.user.findUnique({ where: { email } });
+            //const existingPhoneNumber = await prisma.user.findUnique({ where: { phone_number } });
+
+            if (existingUser) {
+                return res.status(403).send({ message: "User already exists!" });
+            }
+            /*if (existingPhoneNumber) {
+              return res.status(403).send({ message: "Phone number already in use!" });
+            }*/
+
+            const profilePicturePath = req.file ? `/uploads/images/${req.file.filename}` : null;
+
+            const user = await prisma.user.create({
+              data: {
+                Fname,
+                Lname,
+                phone_number,
+                email,
+                password: hashedPassword,
+                role,
+                profilePicture: profilePicturePath,
+                status: status, // Utiliser la valeur convertie en nombre entier
+              },
+            });
+
+            const token = jwt.sign({ email }, config.token_secret, {
+                expiresIn: '36000000',
+            });
+
+            await doSendConfirmationEmail(email, token);
+
+            res.status(201).send({
+                message: "User created successfully",
+                user,
+                token: jwt.verify(token, config.token_secret),
+            });
         });
-  
-        const token = jwt.sign({ email }, config.token_secret, {
-          expiresIn: '36000000',
-        });
-  
-        await doSendConfirmationEmail(email, token);
-  
-        res.status(201).send({
-          message: "User created successfully",
-          user,
-          token: jwt.verify(token, config.token_secret),
-        });
-      });
     } catch (error) {
-      console.log(error);
-      return res.status(500).send({ message: "An error occurred while creating the user" });
+        console.log(error);
+        return res.status(500).send({ message: "An error occurred while creating the user" });
     }
-  },
+
+},
+
   
   async showCreateUserPage  (req: Request, res: Response)  {
     res.render('users/create');
@@ -87,7 +94,7 @@ export const userController = {
     try {
       const users = await prisma.user.findMany();
       if(!req.baseUrl.includes("api")){
-        return res.render('users/index', {users});
+        return res.render('users/index', {users, title: 'Users'});
       }
       return res.json(users);
     } catch (error) {
@@ -96,8 +103,26 @@ export const userController = {
     }
   },
   async showUpdateUserPage  (req: Request, res: Response)  {
-    res.render('users/updateUser');
-  },
+    try {
+      const userId = req.params.id;
+      const user = await prisma.user.findUnique({
+          where: { id: userId },
+          include: {
+            car: true,
+          },
+      });
+
+      if (!user) {
+          return res.status(404).json({ error: 'Utilisateur non trouvé' });
+      }
+      console.log(user)
+
+      res.render('users/update', { user }); // Passer les données de l'utilisateur à la vue
+  } catch (error) {
+      console.error('Erreur lors de la récupération de l\'utilisateur', error);
+      return res.status(500).json({ error: 'Erreur lors de la récupération de l\'utilisateur' });
+  }
+},
 
  
   async confirmation  (req: Request, res: Response)  {
@@ -113,17 +138,30 @@ export const userController = {
     }
   },
 
-  async findUniqueUser(req: Request, res: Response){
+  async findUniqueUser(req: Request, res: Response) {
     const paramId = req.params.id;
 
-    const uniqueUser = await prisma.user.findUnique({
-        where:{
-            id:paramId,
-        },
-    });
+    try {
+        const uniqueUser = await prisma.user.findUnique({
+            where: {
+                id: paramId,
+            },
+            include: {
+                car: true, // Inclure les informations sur la voiture liée à l'utilisateur
+            },
+        });
 
-    return res.json({uniqueUser: uniqueUser})
-  },
+        if (!uniqueUser) {
+            return res.status(404).json({ message: "User not found" });
+        }
+
+        return res.json({ uniqueUser: uniqueUser });
+    } catch (error) {
+        console.log(error);
+        return res.status(500).json({ message: "An error occurred while fetching user data" });
+    }
+},
+
 
   async makeTokenForUser(_id: string, email: string, tokenSecret: string) {
     return jwt.sign({ _id, email }, tokenSecret, {
@@ -199,10 +237,10 @@ export const userController = {
     }
   },
   
-  async updateUser(req: Request, res: Response) {
+  async updateUser( req: Request, res: Response) {
     try {
       const paramId = req.params.id;
-      const { Fname, Lname, phone_number, email, password , role } = req.body; 
+      const {Fname, Lname, phone_number, email, password, role } = req.body; 
       const existingUser = await prisma.user.findUnique({
         where: { id: paramId },
       });
@@ -212,22 +250,22 @@ export const userController = {
       const updateUser = await prisma.user.update({
         where: { id: paramId },
         data: {
-          Fname: Fname || existingUser.Fname, // Vérifier si la nouvelle valeur est fournie, sinon utiliser l'ancienne valeur
-          Lname: Lname || existingUser.Lname,
-          phone_number: phone_number || existingUser.phone_number,
-          email: email || existingUser.email,
-          password: password || existingUser.password,
-          role: role || existingUser.role,
+          Fname,
+          Lname,
+          phone_number,
+          email,
+          password,
+          role,
         },
       });
       return res.json({ updateUser });
     } catch (error) {
+      console.log(error)
       console.error('Erreur lors de la mise à jour de l\'utilisateur', error);
       return res.status(500).json({ error: 'Erreur lors de la mise à jour de l\'utilisateur' });
     }
+
   },
-  
-  
 
   async editProfilePicture(req: Request, res: Response, next: NextFunction){
     try {
@@ -274,35 +312,40 @@ export const userController = {
     res.render('users/login');
   },
   
-  async login (req: Request, res: Response): Promise<void> {
-    const { email, password } = req.body;
-      const user = await prisma.user.findUnique({ where: { email } });  
-   if (user && (await bcrypt.compare(password, user.password))) {
-     const token = jwt.sign({ email: email }, tokenSecret, { expiresIn: '36000000' });
-
-      if (user.isVerified) {
-        console.log("1111111");
-        const userCo = user;
-        const users = await prisma.user.count();
-      
+  async login(req: Request, res: Response): Promise<void> {
+    try {
+      const { email, password } = req.body;
+      const user = await prisma.user.findUnique({
+        where: {
+          email: email
+        }
+      });
   
-        console.log(users);
+      if (user && (await bcrypt.compare(password, user.password))) {
+        const token = jwt.sign({ email: email }, tokenSecret, { expiresIn: '36000000' });
   
-        res.render("layout", {
-          userCo,
-          users,
-          
-        });
+        if (user.isVerified) {
+          const userCo = user;
+          const users = await prisma.user.count();
   
-
-        //res.status(200).send({ token, user, message: 'Success' });
-      }else {
-        res.status(200).send({ user, message: 'Email non vérifié' });
+          res.render("layout", {
+            userCo,
+            users
+          });
+  
+          res.status(200).send({ token, user, message: 'Success' });
+        } else {
+          res.status(200).send({ user, message: 'Email non vérifié' });
+        }
+      } else {
+        res.status(403).send({ message: 'Mot de passe ou email incorrect' });
       }
-    } else {
-      res.status(403).send({ message: 'Mot de passe ou email incorrect' });
+    } catch (error) {
+      console.log(error);
+      res.status(500).send({ message: "Une erreur s'est produite lors de la connexion" });
     }
   },
+  
 
   async loginWithSocial(req: Request, res: Response): Promise<void> {
     const { email, firstName, lastName } = req.body;

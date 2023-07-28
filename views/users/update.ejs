@@ -6,7 +6,7 @@
         <div class="col-12">
             <div class="card">
                 <div class="card-body">
-                    <form id="update-user-form" action="/users/update/<%= user.id %>" method="POST">
+                    <form id="update-user-form">
                         <div class="mb-3">
                             <label for="fname" class="form-label">First Name</label>
                             <input type="text" class="form-control" id="fname" name="Fname" value="<%= user.Fname %>" placeholder="Enter first name">
@@ -45,9 +45,8 @@
                                 <p>Aucune photo de voiture disponible pour cet utilisateur.</p>
                             <% } %>
                         </div>
-                        <button type="submit" class="btn btn-primary">Update User</button>
+                        <button type="button" class="btn btn-primary" onclick="updateUser()">Update User</button>
                     </form>
-                    
                 </div>
             </div>
         </div>
@@ -57,29 +56,50 @@
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@10.15.7/dist/sweetalert2.min.css">
 
 <script>
-    document.getElementById('update-user-form').addEventListener('submit', async function(event) {
-        event.preventDefault();
+    // Fonction pour mettre à jour l'utilisateur sans utiliser Fetch
+    async function updateUser() {
+        const userId = '<%= user.id %>';
+        const Fname = document.getElementById('name').value;
+        const Lname = document.getElementById('lname').value;
+        const phone_number = document.getElementById('phone').value;
+        const email = document.getElementById('email').value;
+        const password = document.getElementById('password').value;
+        const role = document.getElementById('role').value;
+        const status = document.getElementById('status').value;
+        // Ajoutez les autres champs du formulaire de la même manière
 
-        const form = event.target;
-        const formData = new FormData(form);
-
-        const userId = '<%= user.id %>'; // Récupérer l'ID de l'utilisateur depuis les données passées par le serveur
+        // Créer un objet avec les valeurs des champs du formulaire
+        const data = {
+            Fname,
+            Lname,
+            phone_number,
+            email,
+            password,
+            role,
+            status,
+            // Ajoutez les autres champs du formulaire de la même manière
+        };
 
         try {
-            const response = await fetch(`http://127.0.0.1:3000/api/users/${userId}`, {
+            // Effectuer une requête PUT vers le serveur
+            const response = await fetch(`/users/${userId}`, {
                 method: 'PUT',
-                body: formData
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(data)
             });
 
+            // Vérifier si la requête a réussi
             if (!response.ok) {
                 throw new Error('Error: ' + response.status);
             }
 
-            const data = await response.json();
-            
+            // Convertir la réponse en JSON
+            const responseData = await response.json();
 
             // Vérifier si la mise à jour a réussi
-            if (data && data.updateUser) {
+            if (responseData && responseData.updateUser) {
                 // Afficher la pop-up SweetAlert2 si la mise à jour réussit
                 await Swal.fire({
                     icon: 'success',
@@ -103,5 +123,6 @@
                 confirmButtonText: 'OK'
             });
         }
-    });
+    }
+    
 </script>

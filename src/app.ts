@@ -6,6 +6,7 @@ import carRoutes from "./routes/car.routes";
 import LocationRoutes from "./routes/location.routes";
 import userViewRoutes from "./routes/user.views.routes"; 
 import eventsViewRoutes from "./routes/events.views.routes";
+import authRoutes from "./routes/auth.routes"
 
 //import { carRoutes, userRoutes, OrganisateurRoutes, eventRoutes , userViewRoutes  } from "./routes";
 
@@ -41,6 +42,7 @@ class App {
     //this.server.use("/cars", carsViewRoutes);
     this.server.use("/api/location", LocationRoutes);
    /// this.server.use("/organisateurs", organisateurViewRoutes );
+   this.server.use("/sign-in" , authRoutes)
     this.server.use("/api/events", eventRoutes);
     this.server.use("/events" , eventsViewRoutes);
     

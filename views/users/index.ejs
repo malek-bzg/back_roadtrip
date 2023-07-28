@@ -26,50 +26,7 @@
                             </thead>
                             <tbody id="user-table-body">
                                 <!-- Les données des utilisateurs seront insérées ici -->
-                                <% users.forEach(user => { %>
-                                    <tr>
-                                        <td>
-                                            <!-- Insérer le code HTML pour afficher les détails de l'utilisateur -->
-                                            <div class="d-flex px-2 py-1">
-                                                <div>
-                                                    <img src="/assets/img/team-2.jpg" class="avatar avatar-sm me-3" alt="user">
-                                                </div>
-                                                <div class="d-flex flex-column justify-content-center">
-                                                    <p class="text-xs text-secondary mb-0"><%= user.Fname %></p>
-                                                </div>
-                                            </div>
-                                        </td>
-                                        <td>
-                                            <!-- Insérer le code HTML pour afficher les détails de l'utilisateur -->
-                                            <p class="text-xs font-weight-bold mb-0"><%= user.Lname %></p>
-                                        </td>
-                                        <td>
-                                            <!-- Insérer le code HTML pour afficher les détails de l'utilisateur -->
-                                            <p class="text-xs font-weight-bold mb-0"><%= user.email %></p>
-                                        </td>
-                                        <td class="align-middle text-center">
-                                            <!-- Insérer le code HTML pour afficher les détails de l'utilisateur -->
-                                            <span class="text-secondary text-xs font-weight-bold"><%= user.phone_number %></span>
-                                        </td>
-                                        <td class="align-middle">
-                                            <!-- Insérer le code HTML pour afficher les détails de l'utilisateur -->
-                                            <p class="text-xs font-weight-bold mb-0"><%= user.role %></p>
-                                        </td>
-                                        <td class="align-middle">
-                                            <!-- Afficher le statut de l'utilisateur en tant que texte -->
-                                            <% if (user.status === 0) { %>
-                                                <p class="text-xs font-weight-bold mb-0">Active</p>
-                                            <% } else if (user.status === 1) { %>
-                                                <p class="text-xs font-weight-bold mb-0">Banned</p>
-                                            <% } %>
-                                        </td>
-                                        <td class="align-middle">
-                                            <!-- Insérer le code HTML pour les actions d'édition et de suppression de l'utilisateur -->
-                                            <button id="editUserButton" class="btn btn-link btn-sm" onclick="editUser('<%= user.id %>')">Modifier</button>
-                                            <button class="btn btn-link btn-sm" onclick="deleteUser('<%= user.id %>')">Supprimer</button>
-                                        </td>
-                                    </tr>
-                                <% }); %>
+                               
                             </tbody>
                         </table>
                     </div>
@@ -83,6 +40,70 @@
 
 <!-- Ajouter un script pour les actions d'édition et de suppression (vous pouvez les laisser telles quelles car elles utilisent Fetch) -->
 <script>
+     fetch('http://127.0.0.1:3000/api/users') // Update the API endpoint to fetch users
+        .then(response => response.json())
+        .then(data => {
+            const tableBody = document.getElementById('user-table-body'); // Update the table body ID
+
+            data.forEach(user => {
+                const FirstNameCell = `
+                <td>
+                    <div class="d-flex px-2 py-1">
+                            <div>
+                                <img src="${user.profilePicture}" class="avatar avatar-sm me-3" alt="user">
+                            </div>
+                            <div class="d-flex flex-column justify-content-center">
+                                <p class="text-xs text-secondary mb-0">${user.Fname}</p> 
+                               
+                            </div>
+                        </div>
+                </td>
+                `;
+
+                const LastNameCell = `
+                    <td>
+                        <p class="text-xs font-weight-bold mb-0">${user.Lname}</p>
+                    </td>
+                `;
+
+                const PhoneNumberCell = `
+                    <td class="align-middle text-center">
+                        <p class="text-xs font-weight-bold mb-0">${user.email}</p>
+                    </td>
+                `;
+
+                const EmailCell = `
+                    <td>
+                        <p class="text-xs font-weight-bold mb-0">${user.phone_number}</p>
+                    </td>
+                `;
+
+                const RoleCell = `
+                    <td class="align-middle text-center">
+                        <p class="text-secondary text-xs font-weight-bold">${user.role}</p>
+                    </td>
+                `;
+
+                const StatusCell = `
+                    <td class="align-middle text-center">
+                        <p class="text-secondary text-xs font-weight-bold">${user.status}</p>
+                    </td>
+                `;
+
+                const actionCell = `
+                    <td class="align-middle">
+                        <button class="btn btn-link btn-sm" onclick="editUser('${user.id}')">Modifier</button>
+                        <button class="btn btn-link btn-sm" onclick="deleteUser('${user.id}')">Supprimer</button>
+                    </td>
+                `;
+
+                const row = `<tr>${FirstNameCell}${LastNameCell}${PhoneNumberCell}${EmailCell}${RoleCell}${StatusCell}${actionCell}</tr>`;
+                tableBody.innerHTML += row;
+            });
+        })
+        .catch(error => {
+            console.error('Error:', error);
+        });
     // Fonctions pour les actions d'édition et de suppression (vous pouvez les laisser telles quelles car elles utilisent Fetch)
     function editUser(userId) {
         // Code pour gérer l'action de modification de l'utilisateur

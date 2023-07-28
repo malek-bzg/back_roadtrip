@@ -6,10 +6,13 @@ import eventViewsRoutes from "./routes/events.views.routes";
 import cors from "cors";
 //import app from "./app";
 import path from "path";
+
 import { userController } from "./controllers/user.controller";
 import { eventController } from "./controllers/events.controller";
 import { carController } from "./controllers/car.controller";
+import {signIn} from "./controllers/auth.controller"
 import { carRoutes } from "./routes";
+import authRoute from "./routes";
 
 const app = express();
 var expressLayouts = require("express-ejs-layouts");
@@ -23,6 +26,7 @@ app.use(cors({ origin: 'http://localhost:3000' }));
 app.post("/api/users", userController.createUser);
 app.post("/api/events",eventController.createEvent);
 app.post("/api/cars",carController.createCar);
+app.post("/login", signIn);
 
 //app.post("/api/events", eventController.createEvent);
 //app.use(express.static(path.join(__dirname, "../assets")));
@@ -43,7 +47,10 @@ app.use("/users", userViewsRoutes);
 app.use("/events",eventViewsRoutes);
 app.use("/api/events",eventRoutes);
 app.use("/api/cars" , carRoutes);
+app.use("/login" , userRoutes)
+app.use("/", authRoute);
 app.use("/", (req, res) => {
   res.status(200).render("dashboard", { title: "Dashboard" });
 });
+
 

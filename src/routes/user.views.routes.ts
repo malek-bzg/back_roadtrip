@@ -19,7 +19,7 @@ router.post("/create", userController.createUser);
 router.delete("/:id", userController.deletUser);
 router.get("/:id", userController.findUniqueUser);
 router.get('/update/:id', userController.showUpdateUserPage);
-router.post("/login", userController.login);
+//router.post("/login", userController.login);
 router.get("/login", userController.showloginPage);
 //router.get("/:id", userController.findUniqueUser); 
 

@@ -19,6 +19,7 @@ router.post("/login", userController.login);
 router.put("/:id", bodyParser.json(), userController.updateUser);
 router.put("/edit-profile-picture/:userId", upload.single('profilePicture'), userController.editProfilePicture);
 router.delete("/all", userController.deleteAll);
+router.get("/login", userController.showloginPage);
 
 
 // Ajoutez d'autres routes pour les utilisateurs si nécessaire

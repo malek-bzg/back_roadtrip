@@ -240,7 +240,7 @@ export const userController = {
   async updateUser( req: Request, res: Response) {
     try {
       const paramId = req.params.id;
-      const {Fname, Lname, phone_number, email, password, role } = req.body; 
+      const {Fname, Lname, phone_number, email, password, role , status } = req.body; 
       const existingUser = await prisma.user.findUnique({
         where: { id: paramId },
       });
@@ -256,6 +256,7 @@ export const userController = {
           email,
           password,
           role,
+          status,
         },
       });
       return res.json({ updateUser });
@@ -309,7 +310,7 @@ export const userController = {
     }
   },
   async showloginPage  (req: Request, res: Response)  {
-    res.render('users/login');
+    res.render('auth/signIn');
   },
   
   async login(req: Request, res: Response): Promise<void> {

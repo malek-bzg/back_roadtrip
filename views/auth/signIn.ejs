@@ -1,77 +1,91 @@
-<section>
-    <div class="page-header min-vh-100">
-        <div class="container">
-            <div class="row">
-                <div class="col-xl-4 col-lg-5 col-md-7 d-flex flex-column mx-lg-0 mx-auto">
-                    <div class="card card-plain">
-                        <div class="card-header pb-0 text-start">
-                            <h4 class="font-weight-bolder">Sign In</h4>
-                            <p class="mb-0">Enter your email and password to sign in</p>
-                        </div>
-                        <div class="card-body">
-                            <form id="login-form" method="post" action="/login">
-                                <div class="mb-3">
-                                  <input name="email" type="email" class="form-control form-control-lg" placeholder="Email" aria-label="Email" required>
-                                </div>
-                                <div class="mb-3">
-                                  <input name="password" type="password" class="form-control form-control-lg" placeholder="Password" aria-label="Password" required>
-                                </div>
-                                <div class="text-center">
-                                  <button type="submit" class="btn btn-lg btn-primary btn-lg w-100 mt-4 mb-0">Sign in</button>
-                                </div>
-                              </form>
+    <section>
+        <div class="page-header min-vh-100">
+            <div class="container">
+                <div class="row">
+                    <div class="col-xl-4 col-lg-5 col-md-7 d-flex flex-column mx-lg-0 mx-auto">
+                        <div class="card card-plain">
+                            <div class="card-header pb-0 text-start">
+                                <h4 class="font-weight-bolder">Sign In</h4>
+                                <p class="mb-0">Enter your email and password to sign in</p>
+                            </div>
+                            <div class="card-body">
+                                <form id="login-form">
+                                    <div class="mb-3">
+                                        <input type="email" class="form-control" id="email" name="email" placeholder="Enter email">
+                                    </div>
+                                    <div class="mb-3">
+                                        <input type="password" class="form-control" id="password" name="password" placeholder="Enter password">
+                                    </div>
+                                    <div class="text-center">
+                                        <button type="submit" class="btn btn-lg btn-primary btn-lg w-100 mt-4 mb-0">Sign in</button>
+                                    </div>
+                                </form>
+                            </div>
                         </div>
                     </div>
-                </div>
-                <div class="col-6 d-lg-flex d-none h-100 my-auto pe-0 position-absolute top-0 end-0 text-center justify-content-center flex-column">
-                    <div class="position-relative bg-gradient-primary h-100 m-3 px-7 border-radius-lg d-flex flex-column justify-content-center overflow-hidden"
-                        style="background-image: url('https://raw.githubusercontent.com/creativetimofficial/public-assets/master/argon-dashboard-pro/assets/img/signin-ill.jpg');
-          background-size: cover;">
-                        <span class="mask bg-gradient-primary opacity-6"></span>
-                        <h4 class="mt-5 text-white font-weight-bolder position-relative">"Attention is the new
-                            currency"</h4>
-                        <p class="text-white position-relative">The more effortless the writing looks, the more
-                            effort the writer actually put into the process.</p>
+                    <div class="col-6 d-lg-flex d-none h-100 my-auto pe-0 position-absolute top-0 end-0 text-center justify-content-center flex-column">
+                        <div class="position-relative h-100 m-3 px-7 border-radius-lg d-flex flex-column justify-content-center overflow-hidden"
+                            style="background-image: url('/assets/img/logoapp.png');
+                                    background-size: cover;
+                                    background-color: rgba(255, 255, 2, 0.5);">
+                            <span class="mask bg-gradient-primary opacity-6"></span>
+                        </div>
                     </div>
                 </div>
             </div>
         </div>
-    </div>
-</section>
+    </section>
 
-<script>
-    document.getElementById('login-form').addEventListener('submit', function(event){
-    event.preventDefault();
-
-    const form = event.target;
-    const formData = new FormData(form);
-
-    fetch('http://127.0.0.1:3000/login', {
-        method: 'POST',
-        body: formData
-    })
-    .then(response => {
-        // Vérifier si la réponse a un statut 200 OK
-        if (!response.ok) {
-            throw new Error('Error: ' + response.status);
-        }
-        // Convertir la réponse en JSON
-        return response.json();
-    })
-    .then(data => {
-        // Ici, 'data' contiendra les données JSON renvoyées par le serveur
-        console.log(data);
-        // Gérer la réponse de la connexion ici, par exemple, rediriger l'utilisateur vers une nouvelle page
-        if (data.token) {
-            window.location.href = '/dashboard'; // Rediriger vers une page de tableau de bord si la connexion réussit
-        } else {
-            // Gérer les autres cas, par exemple, afficher un message d'erreur si la connexion échoue
-        }
-    })
-    .catch(error => {
-        console.error('Error:', error);
-    });
-});
-
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@10.15.7/dist/sweetalert2.min.js"></script>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@10.15.7/dist/sweetalert2.min.css">
+    <script defer>
+        document.addEventListener('DOMContentLoaded', function() {
+            document.getElementById('login-form').addEventListener('submit', function (event) {
+                event.preventDefault();
+      
+                const email = document.getElementById('email').value;
+                const password = document.getElementById('password').value;
+                const userData = { email, password };
+      
+                fetch('http://127.0.0.1:3000/api/sign-in', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(userData)
+                })
+                .then(response => response.json())
+                .then(data => {
+                    console.log(data);
+                    if (data.message === 'Success') {
+                        // Affiche la popup de succès
+                        Swal.fire({
+                            title: 'Success',
+                            text: 'Vous êtes maintenant connecté en tant qu\'administrateur.',
+                            icon: 'success',
+                            confirmButtonText: 'OK',
+                            allowOutsideClick: false,
+                            allowEscapeKey: false
+                        }).then(() => {
+                            // Redirige vers le dashboard pour l'utilisateur de rôle "Admin"
+                            window.location.href = '/dashboard'; // Remplacez "/dashboard" par l'URL de votre dashboard
+                        });
+                    } else {
+                        // Affiche la popup d'erreur avec le message d'erreur renvoyé par le serveur
+                        Swal.fire({
+                            title: 'Erreur',
+                            text: data.message,
+                            icon: 'error',
+                            confirmButtonText: 'OK',
+                            allowOutsideClick: false,
+                            allowEscapeKey: false
+                        });
+                    }
+                })
+                .catch(error => {
+                    console.error('API Error:', error);
+                    // Handle other error cases, if needed
+                });
+            });
+        });
     </script>
-    

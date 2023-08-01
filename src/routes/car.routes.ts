@@ -10,5 +10,7 @@ router.get("/:id", carController.findUniqueCar);
 router.put("/:id", carController.updateCar);
 router.put("/edit-car-picture/:carId", upload.single('carPicture'), carController.editcarPicture)
 router.delete("/:id", carController.deletCar);
+//router.get("/cars" , carController.showCarPage)
+
 
 export default router;

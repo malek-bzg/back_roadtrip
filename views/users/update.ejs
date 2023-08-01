@@ -1,5 +1,3 @@
-<!-- update.ejs -->
-
 <div class="container-fluid py-4">
     <h1>UPDATE</h1>
     <div class="row">
@@ -36,6 +34,14 @@
                             </select>
                         </div>
                         <div class="mb-3">
+                            <label for="status" class="form-label">Status</label>
+                            <select class="form-control" id="status" name="status">
+                                <!-- Utilisez des nombres entiers (Int) pour les valeurs des options -->
+                                <option value="0" <%= user.status === 0 ? 'selected' : '' %>>Actif</option>
+                                <option value="1" <%= user.status === 1 ? 'selected' : '' %>>Banned</option>
+                            </select>
+                        </div>
+                        <div class="mb-3">
                             <label for="carPicture" class="form-label">Photo de la voiture</label>
                             <% if (user.car && user.car.carPicture) { %>
                                 <!-- Afficher la photo de la voiture si l'utilisateur a ajouté une voiture -->
@@ -45,7 +51,8 @@
                                 <p>Aucune photo de voiture disponible pour cet utilisateur.</p>
                             <% } %>
                         </div>
-                        <button type="button" class="btn btn-primary" onclick="updateUser()">Update User</button>
+                        <button type="submit" class="btn btn-primary">Update User</button>
+
                     </form>
                 </div>
             </div>
@@ -56,33 +63,35 @@
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@10.15.7/dist/sweetalert2.min.css">
 
 <script>
-    // Fonction pour mettre à jour l'utilisateur sans utiliser Fetch
-    async function updateUser() {
-        const userId = '<%= user.id %>';
-        const Fname = document.getElementById('name').value;
-        const Lname = document.getElementById('lname').value;
-        const phone_number = document.getElementById('phone').value;
-        const email = document.getElementById('email').value;
-        const password = document.getElementById('password').value;
-        const role = document.getElementById('role').value;
-        const status = document.getElementById('status').value;
-        // Ajoutez les autres champs du formulaire de la même manière
-
-        // Créer un objet avec les valeurs des champs du formulaire
-        const data = {
-            Fname,
-            Lname,
-            phone_number,
-            email,
-            password,
-            role,
-            status,
-            // Ajoutez les autres champs du formulaire de la même manière
-        };
-
+    async function updateUser(event) {
         try {
+            event.preventDefault();
+
+            const userId = '<%= user.id %>'; // Remplacez cette ligne par le moyen d'obtenir l'ID de l'utilisateur
+
+            const Fname = document.getElementById('fname').value;
+            const Lname = document.getElementById('lname').value;
+            const phone_number = document.getElementById('phone').value;
+            const email = document.getElementById('email').value;
+            const password = document.getElementById('password').value;
+            const role = document.getElementById('role').value;
+            const status = parseInt(document.getElementById('status').value);
+
+
+            // Créez un objet avec les valeurs des champs du formulaire
+            const data = {
+                Fname,
+                Lname,
+                phone_number,
+                email,
+                password,
+                role,
+                status,
+                // Ajoutez les autres champs du formulaire ici
+            };
+
             // Effectuer une requête PUT vers le serveur
-            const response = await fetch(`/users/${userId}`, {
+            const response = await fetch(`http://127.0.0.1:3000/api/users/${userId}`, {
                 method: 'PUT',
                 headers: {
                     'Content-Type': 'application/json'
@@ -124,5 +133,12 @@
             });
         }
     }
-    
+
+    document.addEventListener('DOMContentLoaded', () => {
+        const updateUserForm = document.getElementById('update-user-form');
+        updateUserForm.addEventListener('submit', updateUser);
+    });
 </script>
+
+
+

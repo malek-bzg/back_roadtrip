@@ -8,8 +8,6 @@ import { tokenSecret } from "../../config";
 import { NextFunction } from 'express';
 import sgMail from '@sendgrid/mail';
 
-
-
 const prisma = new PrismaClient();
 const storage = multer.diskStorage({
   destination: (req, file, cb) => {
@@ -83,12 +81,9 @@ export const userController = {
     }
 
 },
-
-  
   async showCreateUserPage  (req: Request, res: Response)  {
     res.render('users/create');
   },
-
   index: async (req: Request, res: Response) => {
     console.log(req.baseUrl);
     try {
@@ -123,8 +118,6 @@ export const userController = {
       return res.status(500).json({ error: 'Erreur lors de la récupération de l\'utilisateur' });
   }
 },
-
- 
   async confirmation  (req: Request, res: Response)  {
     let token: any;
   
@@ -137,7 +130,6 @@ export const userController = {
       });
     }
   },
-
   async findUniqueUser(req: Request, res: Response) {
     const paramId = req.params.id;
 
@@ -161,14 +153,11 @@ export const userController = {
         return res.status(500).json({ message: "An error occurred while fetching user data" });
     }
 },
-
-
   async makeTokenForUser(_id: string, email: string, tokenSecret: string) {
     return jwt.sign({ _id, email }, tokenSecret, {
       expiresIn: " 100000000 ", // in Milliseconds (3600000 = 1 hour)
     });
   },
-
   async getUserByToken  (req: Request, res: Response)  {
     let token = req.body.token;
   
@@ -182,7 +171,6 @@ export const userController = {
   
     res.send({ token, user });
   },
-
   async sendConfirmationEmail(req: Request, res: Response): Promise<void> {
     try {
       const { email } = req.body;
@@ -313,7 +301,7 @@ export const userController = {
     res.render('auth/signIn');
   },
   
-  async login(req: Request, res: Response): Promise<void> {
+ /* async login(req: Request, res: Response): Promise<void> {
     try {
       const { email, password } = req.body;
       const user = await prisma.user.findUnique({
@@ -345,10 +333,8 @@ export const userController = {
       console.log(error);
       res.status(500).send({ message: "Une erreur s'est produite lors de la connexion" });
     }
-  },
-  
-
-  async loginWithSocial(req: Request, res: Response): Promise<void> {
+  },*/
+async loginWithSocial(req: Request, res: Response): Promise<void> {
     const { email, firstName, lastName } = req.body;
   
     if (email === '') {
@@ -381,7 +367,6 @@ export const userController = {
       res.status(201).send({ message: 'Succès', user, token });
     }
   }
-  
 };
 
 const config = {
@@ -398,9 +383,9 @@ const makeTokenForUser = (_id: string, email: string): string => {
 };
 async function doSendConfirmationEmail(email: string, token: string): Promise<void> {
   try {
-    sgMail.setApiKey('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');
+    sgMail.setApiKey('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');
 
-    const urlDeConfirmation = "http://localhost:3333/api/user/confirmation/" + token;
+    const urlDeConfirmation = "http://localhost:3000/api/user/confirmation/" + token;
     const msg = {
       to: email,
       from: 'application.roadtrip.app@gmail.com',
@@ -416,7 +401,7 @@ async function doSendConfirmationEmail(email: string, token: string): Promise<vo
 }
 async function envoyerEmailReinitialisation(email: string, codeDeReinit: string): Promise<void> {
   
-  sgMail.setApiKey('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');
+  sgMail.setApiKey('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');
   const msg = {
     to: email,
     from: 'application.roadtrip.app@gmail.com',

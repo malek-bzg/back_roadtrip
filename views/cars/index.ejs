@@ -1,13 +1,11 @@
-<!-- index.ejs -->
-
 <div class="container-fluid py-4">
-    <h1>USERS</h1>
+    <h1>CARS</h1>
     <div class="row">
         <div class="col-12">
             <div class="card">
                 <div class="card-header pb-0 d-flex align-items-center justify-content-between">
-                    <h6>Users list</h6>
-                    <a class="btn btn-primary btn-sm mb-0" href="/users/create" type="button">Add new</a>
+                    <h6>Cars list</h6>
+                    <!--<a class="btn btn-primary btn-sm mb-0" href="/cars/create" type="button">Add new</a>-->
                 </div>
                 <div class="card-body px-0 pt-0 pb-2">
                     <div class="row mb-3">
@@ -22,18 +20,17 @@
                         <table class="table align-items-center mb-0">
                             <thead>
                                 <tr>
-                                    <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">FName</th>
-                                    <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7 ps-2">LNAME</th>
-                                    <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">EMAIL</th>
-                                    <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">PHONE_NUMBER</th>
-                                    <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">ROLE</th>
-                                    <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Status</th>
+                                    <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">User </th>
+                                    <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Car Name</th>
+                                    <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7 ps-2">Car Color</th>
+                                    <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Car Picture</th>
+                                    <!-- Ajoutez d'autres en-têtes de colonnes pertinents pour les détails de la voiture -->
                                     <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Action</th>
                                     <th class="text-secondary opacity-7"></th>
                                 </tr>
                             </thead>
-                            <tbody id="user-table-body">
-                                <!-- Les données des utilisateurs seront insérées ici -->
+                            <tbody id="car-table-body">
+                                <!-- Les données des voitures seront insérées ici -->
                             </tbody>
                         </table>
                     </div>
@@ -42,7 +39,6 @@
         </div>
     </div>
 </div>
-
 <style>
     /* Style pour ajuster le formulaire de recherche */
     .input-group {
@@ -63,90 +59,81 @@
 </style>
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@10.15.7/dist/sweetalert2.min.js"></script>
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@10.15.7/dist/sweetalert2.min.css">
+<!-- ... Autres parties de l'interface ... -->
 
-<!-- Ajouter un script pour les actions d'édition et de suppression (vous pouvez les laisser telles quelles car elles utilisent Fetch) -->
 <script>
     const searchInput = document.getElementById('searchInput');
     const searchButton = document.getElementById('searchButton');
 
     searchButton.addEventListener('click', handleSearch);
     searchInput.addEventListener('keyup', handleSearch);
-
-     fetch('http://127.0.0.1:3000/api/users') // Update the API endpoint to fetch users
+    fetch('http://127.0.0.1:3000/api/cars')
         .then(response => response.json())
         .then(data => {
-            const tableBody = document.getElementById('user-table-body'); // Update the table body ID
+            const tableBody = document.getElementById('car-table-body');
 
-            data.forEach(user => {
-                const FirstNameCell = `
+            data.forEach(car => {
+                const NameCell = `
+                    <td>
+                        <p class="text-xs text-secondary mb-0">${car.name}</p>
+                    </td>
+                `;
+                const FNameCell = `
                 <td>
-                    <div class="d-flex px-2 py-1">
-                            <div>
-                                <img src="${user.profilePicture}" class="avatar avatar-sm me-3" alt="user">
-                            </div>
-                            <div class="d-flex flex-column justify-content-center">
-                                <p class="text-xs text-secondary mb-0">${user.Fname}</p> 
+                   <div class="d-flex px-2 py-1">
+                    <div>
+                        <img src="${car.user.profilePicture}" class="avatar avatar-sm me-3" alt="car">
+                     </div>
+                     <div class="d-flex flex-column justify-content-center">
+                        <p class="text-xs text-secondary mb-0">${car.user.Fname}</p> 
                                
-                            </div>
-                        </div>
-                </td>
+                    </div>
+                    </div> 
+                 </td>  
                 `;
+               /* const PictureUserCell = `
+                    <td class="align-middle text-center">
+                        <img src="${car.user.profilePicture}" class="avatar avatar-sm me-3" alt="car">
+                    </td>
+                `;*/
 
-                const LastNameCell = `
+                const ColorCell = `
                     <td>
-                        <p class="text-xs font-weight-bold mb-0">${user.Lname}</p>
+                        <p class="text-xs font-weight-bold mb-0">${car.color}</p>
                     </td>
                 `;
 
-                const PhoneNumberCell = `
+                const PictureCell = `
                     <td class="align-middle text-center">
-                        <p class="text-xs font-weight-bold mb-0">${user.email}</p>
-                    </td>
-                `;
-
-                const EmailCell = `
-                    <td>
-                        <p class="text-xs font-weight-bold mb-0">${user.phone_number}</p>
-                    </td>
-                `;
-
-                const RoleCell = `
-                    <td class="align-middle text-center">
-                        <p class="text-secondary text-xs font-weight-bold">${user.role}</p>
-                    </td>
-                `;
-
-                const StatusCell = `
-                    <td class="align-middle text-center">
-                        <p class="text-secondary text-xs font-weight-bold">${user.status}</p>
+                        <img src="${car.carPicture}" class="avatar avatar-sm me-3" alt="car">
                     </td>
                 `;
 
                 const actionCell = `
                     <td class="align-middle">
-                        <button class="btn btn-link btn-sm" onclick="editUser('${user.id}')">Modifier</button>
-                        <button class="btn btn-link btn-sm" onclick="deleteUser('${user.id}')">Supprimer</button>
+                    
+                        <button class="btn btn-link btn-sm" onclick="deleteCar('${car.id}')">Supprimer</button>
                     </td>
                 `;
 
-                const row = `<tr>${FirstNameCell}${LastNameCell}${PhoneNumberCell}${EmailCell}${RoleCell}${StatusCell}${actionCell}</tr>`;
+                const row = `<tr>${FNameCell}${NameCell}${ColorCell}${PictureCell}${actionCell}</tr>`;
                 tableBody.innerHTML += row;
             });
         })
         .catch(error => {
             console.error('Error:', error);
         });
-    // Fonctions pour les actions d'édition et de suppression (vous pouvez les laisser telles quelles car elles utilisent Fetch)
-    function editUser(userId) {
-        // Code pour gérer l'action de modification de l'utilisateur
-        // Rediriger vers la page de modification de l'utilisateur avec l'ID du utilisateur
-        window.location.href = `/users/update/${userId}`;
-    }
 
-    function deleteUser(userId) {
-   Swal.fire({
+   /* function editCar(carId) {
+        // Code pour gérer l'action de modification de la voiture
+        // Rediriger vers la page de modification de la voiture avec l'ID de la voiture
+        window.location.href = `/cars/update/${carId}`;
+    }*/
+
+    function deleteCar(carId) {
+        Swal.fire({
             title: 'Confirmation',
-            text: "Voulez-vous vraiment supprimer cet utilisateur ?",
+            text: "Voulez-vous vraiment supprimer cette voiture ?",
             icon: 'warning',
             showCancelButton: true,
             confirmButtonColor: '#3085d6',
@@ -156,14 +143,14 @@
         }).then((result) => {
             if (result.isConfirmed) {
                 // Si l'utilisateur clique sur "Oui", supprimer l'utilisateur
-                fetch(`http://127.0.0.1:3000/api/users/${userId}`, {
+                fetch(`http://127.0.0.1:3000/api/carss/${carId}`, {
                     method: 'DELETE'
                 })
                 .then(response => response.json())
                 .then(data => {
-                    console.log('User deleted:', data.deletedUser);
+                    console.log('Car deleted:', data.deletedCar);
                     // Afficher une alerte de succès après la suppression
-                    Swal.fire('Supprimé !', 'L\'utilisateur a été supprimé avec succès.', 'success');
+                    Swal.fire('Supprimé !', 'L\'voiture a été supprimé avec succès.', 'success');
                     // Recharger la page pour actualiser le tableau
                     location.reload();
                 })
@@ -175,7 +162,7 @@
     }
     function handleSearch() {
         const searchValue = searchInput.value.trim().toLowerCase();
-        const rows = document.querySelectorAll('#user-table-body tr');
+        const rows = document.querySelectorAll('#car-table-body tr');
 
         rows.forEach(row => {
             const firstName = row.querySelector('td:nth-child(1) p').textContent.trim().toLowerCase();

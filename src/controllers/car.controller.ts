@@ -52,19 +52,47 @@ export const carController = {
   },
   
 
-    async index(req:Request, res:Response){
-      console.log(req.baseUrl);
-      try {
-        const cars = await prisma.car.findMany();
-        if(!req.baseUrl.includes("api")){
-          return res.render('cars/car', {cars});
+  async index(req: Request, res: Response) {
+    console.log(req.baseUrl);
+    try {
+      const cars = await prisma.car.findMany({
+        include: {
+          user: true // Inclure les données de l'utilisateur associé
         }
-        return res.json(cars);
-      } catch (error) {
-        console.log(error);
-        return res.status(500).send({ message: "An error occurred while retrieving users" });
+      });
+  
+      if (!req.baseUrl.includes("api")) {
+        return res.render('cars/index', { cars });
       }
-    },
+  
+      return res.json(cars);
+    } catch (error) {
+      console.log(error);
+      return res.status(500).send({ message: "Une erreur s'est produite lors de la récupération des utilisateurs" });
+    }
+  },
+  
+    /*async showCarPage  (req: Request, res: Response)  {
+      try {
+        const carId = req.params.id;
+        const car = await prisma.car.findUnique({
+            where: { id: carId },
+            include: {
+              user: true,
+            },
+        });
+  
+        if (!car) {
+            return res.status(404).json({ error: 'voiture non trouvé' });
+        }
+        console.log(car)
+  
+        res.render('cars/index', { car }); // Passer les données de l'utilisateur à la vue
+    } catch (error) {
+        console.error('Erreur lors de la récupération de l\'voiture', error);
+        return res.status(500).json({ error: 'Erreur lors de la récupération de l\'voiture' });
+    }
+  },*/
 
     async findUniqueCar(req: Request, res: Response){
         const paramId = req.params.id;

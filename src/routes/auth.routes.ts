@@ -8,8 +8,10 @@ const router = express.Router();
 
 router.use(express.json())
 router.get("/sign-in", authController.signInView);
+router.post('/sign-in', authController.signIn);
 //router.get("/sign-in", authController.signIn);
-router.post("/api/sign-in", authController.signIn);
+//router.post("/api/sign-in", authController.signIn);
+
 
 
 

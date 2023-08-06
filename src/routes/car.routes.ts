@@ -5,6 +5,7 @@ import { upload } from '../middlewares/storage';
 
 const router = express.Router();
 router.get("/", carController.index );
+router.delete("/carPicture/:carId", carController.deleteCarPicture);
 router.post("/create", carController.createCar);
 router.get("/:id", carController.findUniqueCar);
 router.put("/:id", carController.updateCar);

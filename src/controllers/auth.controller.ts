@@ -1,3 +1,4 @@
+//import { tokenSecret } from './../../config';
 import { Request, Response } from "express";
 import bcrypt from 'bcrypt';
 import jwt from 'jsonwebtoken';
@@ -6,6 +7,8 @@ import express from 'express';
 import bodyParser from 'body-parser';
 import { PrismaClient } from "@prisma/client";
 import multer from "multer";
+import session, { SessionData } from 'express-session';
+import MySessionData from '../../session'
 
 const prisma = new PrismaClient();
 const storage = multer.diskStorage({
@@ -19,6 +22,8 @@ const storage = multer.diskStorage({
 });
 
 const upload = multer({ storage }).single('carPicture');
+const secretKey = process.env.JWT_SECRET_KEY || 'ma_clé_secrète_pour_jwt_sign';
+
 
 export const authController = {
   signInView: (req: Request, res: Response) => {
@@ -27,35 +32,22 @@ export const authController = {
 
   signIn: async (req: Request, res: Response) => {
     try {
-        const { email, password } = req.body;
-        const user = await prisma.user.findUnique({
-            where: {
-                email: email
-            }
-        });
+      const { email, password } = req.body;
+     
 
-        // Check if the user exists and has the role "Admin"
-        if (!user || user.role !== "Admin") {
-            return res.status(403).json({ message: "Only users with the 'Admin' role can perform authentication." });
-        }
+      // Si l'authentification réussit, générer le token
+      const token = jwt.sign({ email }, tokenSecret, { expiresIn: '1h' });
+      console.log(token)
 
-    // Vérifier si le mot de passe correspond (Notez que cela n'utilise pas bcrypt)
-    if (user && user.password === password) {
-      const token = jwt.sign({ email: email }, tokenSecret, { expiresIn: '36000000' });
-
-      if (!user.isVerified) {
-          return res.status(200).json({ token, user, message: 'Success' });
-      } else {
-          return res.status(200).json({ user, message: 'Email non vérifié' });
-      }
-  } else {
-      return res.status(403).json({ message: 'Mot de passe ou email incorrect' });
+      // Stocker le token dans la session
+      req.body = token;
+      
+      
+      // Retourner une réponse JSON avec le token et un message de succès
+      res.status(200).json({ token, message: 'Success' });
+    } catch (error) {
+      console.error('Error:', error);
+      res.status(500).json({ message: "Une erreur s'est produite lors de la connexion" });
+    }
   }
-} catch (error) {
-  console.log(error);
-  return res.status(500).json({ message: "Une erreur s'est produite lors de la connexion" });
-}
-},
-
-
 };

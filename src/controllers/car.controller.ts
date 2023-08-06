@@ -2,6 +2,7 @@
 import { NextFunction, Request, Response } from "express";
 import { PrismaClient } from "@prisma/client";
 import multer from "multer";
+import fs from "fs";
 
 const prisma = new PrismaClient();
 const storage = multer.diskStorage({
@@ -134,7 +135,7 @@ export const carController = {
           const carPicture_update = await prisma.car.update({
             where: { id: carId },
             data: {
-              carPicture: file.filename,
+              carPicture: req.file ? `/uploads/images/${req.file.filename}` : null,
             },
           });
       
@@ -147,15 +148,60 @@ export const carController = {
       },
     
       async deletCar(req: Request, res: Response){
-        
-        const paramId = req.params.id;
-        const deletedCar = await prisma.car.delete({
-            where: {
-                id : paramId,
-            },
-        });
-    
-        return res.json({deletedCar: deletedCar});
-      },   
+        try {
+          const paramId = req.params.id;
       
-};
+          // Vérifiez si la voiture existe avant de la supprimer
+          const existingCar = await prisma.car.findUnique({
+            where: {
+              id: paramId,
+            },
+          });
+      
+          if (!existingCar) {
+            return res.status(404).json({ error: "La voiture n'a pas été trouvée." });
+          }
+      
+          // Supprimez la voiture
+          const deletedCar = await prisma.car.delete({
+            where: {
+              id: paramId,
+            },
+          });
+      
+          return res.json({ deletedCar });
+        } catch (error) {
+          console.error('Error:', error);
+          return res.status(500).json({ error: 'Une erreur s\'est produite lors de la suppression de la voiture.' });
+        }
+      },  
+
+      async deleteCarPicture(req: Request, res: Response) {
+        try {
+            const carId = req.params.carId;
+    
+            // Récupérer le chemin de l'image actuelle dans la base de données
+            const car = await prisma.car.findUnique({ where: { id: carId }, select: { carPicture: true } });
+    
+            if (!car || !car.carPicture) {
+                return res.status(404).send({ message: "Car or carPicture not found" });
+            }
+    
+            // Supprimer l'image du dossier "public/uploads/images"
+            const imagePath = `public${car.carPicture}`;
+            fs.unlinkSync(imagePath); // Supprimez le fichier d'image du disque
+    
+            // Mettre à jour le champ "carPicture" pour qu'il soit null dans la base de données
+            const updatedCar = await prisma.car.update({ where: { id: carId }, data: { carPicture: null } });
+    
+            return res.json({ updatedCar });
+        } catch (error) {
+            console.log(error);
+            return res.status(500).send({ message: "An error occurred while deleting the carPicture" });
+        }
+    }
+    
+    };
+
+      
+      

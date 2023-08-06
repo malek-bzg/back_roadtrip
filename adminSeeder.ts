@@ -1,5 +1,6 @@
 const { PrismaClient } = require('@prisma/client');
 const prisma = new PrismaClient();
+const jwt = require('jsonwebtoken');
 
 const adminData = {
   password: 'adminpassword', // Vous devriez utiliser un système de hachage pour stocker le mot de passe dans une vraie application
@@ -18,6 +19,8 @@ async function seedAdmin() {
     });
 
     console.log('Admin créé avec succès :', admin);
+    const token = jwt.sign({ id: admin.id, role: admin.role }, 'votre_secret_key');
+    console.log('Token d\'authentification pour l\'administrateur :', token);
   } catch (error) {
     console.error('Erreur lors de la création de l\'admin :', error);
   } finally {

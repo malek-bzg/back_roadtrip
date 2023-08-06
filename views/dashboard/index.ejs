@@ -400,4 +400,35 @@
             </div>
         </div>
     </div>
+   <!--> <script>
+        // Récupérer le token depuis le localStorage
+        const urlParams = new URLSearchParams(window.location.search);
+        const token = urlParams.get('token');
+    
+        const requestOptions = {
+            method: 'GET', // Modifier la méthode en 'GET' si nécessaire
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${token}`,
+            },
+        };
+    
+        // Remplacer "dashboardUrl" par l'URL de l'API que vous souhaitez accéder
+        const dashboardUrl = 'http://127.0.0.1:3000/api/dashboard'; 
+    
+        // Exemple d'utilisation de fetch avec le token dans l'en-tête pour accéder à une route protégée
+        fetch(dashboardUrl, requestOptions)
+            .then(response => response.json())
+            .then(data => {
+                // Traiter la réponse de l'API
+                console.log(data);
+            })
+            .catch(error => {
+                // Gérer les erreurs
+                console.error(error);
+            });
+    </script>-->
+    
+    
+    
 </div>

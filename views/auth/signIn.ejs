@@ -1,91 +1,99 @@
-    <section>
-        <div class="page-header min-vh-100">
-            <div class="container">
-                <div class="row">
-                    <div class="col-xl-4 col-lg-5 col-md-7 d-flex flex-column mx-lg-0 mx-auto">
-                        <div class="card card-plain">
-                            <div class="card-header pb-0 text-start">
-                                <h4 class="font-weight-bolder">Sign In</h4>
-                                <p class="mb-0">Enter your email and password to sign in</p>
-                            </div>
-                            <div class="card-body">
-                                <form id="login-form">
-                                    <div class="mb-3">
-                                        <input type="email" class="form-control" id="email" name="email" placeholder="Enter email">
-                                    </div>
-                                    <div class="mb-3">
-                                        <input type="password" class="form-control" id="password" name="password" placeholder="Enter password">
-                                    </div>
-                                    <div class="text-center">
-                                        <button type="submit" class="btn btn-lg btn-primary btn-lg w-100 mt-4 mb-0">Sign in</button>
-                                    </div>
-                                </form>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="col-6 d-lg-flex d-none h-100 my-auto pe-0 position-absolute top-0 end-0 text-center justify-content-center flex-column">
-                        <div class="position-relative h-100 m-3 px-7 border-radius-lg d-flex flex-column justify-content-center overflow-hidden"
-                            style="background-image: url('/assets/img/logoapp.png');
-                                    background-size: cover;
-                                    background-color: rgba(255, 255, 2, 0.5);">
-                            <span class="mask bg-gradient-primary opacity-6"></span>
-                        </div>
-                    </div>
-                </div>
+<section>
+  <div class="page-header min-vh-100">
+    <div class="container">
+      <div class="row">
+        <div class="col-xl-4 col-lg-5 col-md-7 d-flex flex-column mx-lg-0 mx-auto">
+          <div class="card card-plain">
+            <div class="card-header pb-0 text-start">
+              <h4 class="font-weight-bolder">Sign In</h4>
+              <p class="mb-0">Enter your email and password to sign in</p>
             </div>
+            <div class="card-body">
+              <form id="login-form">
+                <div class="mb-3">
+                  <input type="email" class="form-control" id="email" name="email" placeholder="Enter email">
+                </div>
+                <div class="mb-3">
+                  <input type="password" class="form-control" id="password" name="password" placeholder="Enter password">
+                </div>
+                <div class="text-center">
+                  <button type="submit" class="btn btn-lg btn-primary btn-lg w-100 mt-4 mb-0">Sign in</button>
+                </div>
+              </form>
+            </div>
+          </div>
         </div>
-    </section>
+        <div class="col-6 d-lg-flex d-none h-100 my-auto pe-0 position-absolute top-0 end-0 text-center justify-content-center flex-column">
+          <div class="position-relative h-100 m-3 px-7 border-radius-lg d-flex flex-column justify-content-center overflow-hidden"
+            style="background-image: url('/assets/img/logoapp.png');
+                    background-size: cover;
+                    background-color: rgba(197 203 237);">
+            <span class=""></span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
 
-    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@10.15.7/dist/sweetalert2.min.js"></script>
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@10.15.7/dist/sweetalert2.min.css">
-    <script defer>
-        document.addEventListener('DOMContentLoaded', function() {
-            document.getElementById('login-form').addEventListener('submit', function (event) {
-                event.preventDefault();
-      
-                const email = document.getElementById('email').value;
-                const password = document.getElementById('password').value;
-                const userData = { email, password };
-      
-                fetch('http://127.0.0.1:3000/api/sign-in', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json'
-                    },
-                    body: JSON.stringify(userData)
-                })
-                .then(response => response.json())
-                .then(data => {
-                    console.log(data);
-                    if (data.message === 'Success') {
-                        // Affiche la popup de succès
-                        Swal.fire({
-                            title: 'Success',
-                            text: 'Vous êtes maintenant connecté en tant qu\'administrateur.',
-                            icon: 'success',
-                            confirmButtonText: 'OK',
-                            allowOutsideClick: false,
-                            allowEscapeKey: false
-                        }).then(() => {
-                            // Redirige vers le dashboard pour l'utilisateur de rôle "Admin"
-                            window.location.href = '/dashboard'; // Remplacez "/dashboard" par l'URL de votre dashboard
-                        });
-                    } else {
-                        // Affiche la popup d'erreur avec le message d'erreur renvoyé par le serveur
-                        Swal.fire({
-                            title: 'Erreur',
-                            text: data.message,
-                            icon: 'error',
-                            confirmButtonText: 'OK',
-                            allowOutsideClick: false,
-                            allowEscapeKey: false
-                        });
-                    }
-                })
-                .catch(error => {
-                    console.error('API Error:', error);
-                    // Handle other error cases, if needed
-                });
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@10.15.7/dist/sweetalert2.min.js"></script>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@10.15.7/dist/sweetalert2.min.css">
+
+<script defer>
+  document.addEventListener('DOMContentLoaded', function () {
+    document.getElementById('login-form').addEventListener('submit', function (event) {
+      event.preventDefault();
+
+      const email = document.getElementById('email').value;
+      const password = document.getElementById('password').value;
+      const userData = { email, password };
+
+      // Remplacez 'http://127.0.0.1:3000' par l'URL de votre serveur backend
+      const backendURL = 'http://127.0.0.1:3000';
+
+      fetch(`${backendURL}/sign-in`, {
+        method: 'POST', // Utilisez une requête POST ici
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(userData),
+      })
+        .then((response) => {
+          if (!response.ok) {
+            throw new Error('Network response was not ok');
+          }
+          return response.json();
+        })
+        .then((data) => {
+          if (data.message === 'Success') {
+            const token = data.token;
+            localStorage.setItem('token', token);
+            console.log(data);
+
+            // Redirigez vers le tableau de bord après une connexion réussie
+            window.location.href = `${backendURL}/dashboard`;
+          } else {
+            Swal.fire({
+              title: 'Erreur',
+              text: data.message,
+              icon: 'error',
+              confirmButtonText: 'OK',
+              allowOutsideClick: false,
+              allowEscapeKey: false,
             });
+          }
+        })
+        .catch((error) => {
+          console.error('API Error:', error);
+          Swal.fire({
+            title: 'Erreur',
+            text: 'An error occurred. Please try again later.',
+            icon: 'error',
+            confirmButtonText: 'OK',
+            allowOutsideClick: false,
+            allowEscapeKey: false,
+          });
         });
-    </script>
+    });
+  });
+</script>
